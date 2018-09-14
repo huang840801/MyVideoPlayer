@@ -1,9 +1,11 @@
 package com.guanhong.myvideoplayer;
 
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
@@ -89,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        mVideoView = findViewById(R.id.videoview);
 
         mHolder.addCallback(this);
-        mHolder.setKeepScreenOn(true);
+        mHolder.setKeepScreenOn(false);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
         mDuration = mMediaPlayer.getDuration();
@@ -170,6 +172,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void volumeMute() {
 
+//        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//        mMediaPlayer.prepareAsync();
+
 
         if (isMute) {
 
@@ -178,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mButtonVolume.setBackgroundResource(R.drawable.volume_open);
             isMute = false;
 
-            mMediaPlayer.setVolume(0f,0f);
+            mMediaPlayer.setVolume(0f, 0f);
 
         } else {
 
@@ -187,20 +192,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mButtonVolume.setBackgroundResource(R.drawable.volume_off);
             isMute = true;
 
-            mMediaPlayer.setVolume(1000f,1000f);
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.start();
+            mMediaPlayer.setVolume(1f,1f);
+
+
+
+
+//            mMediaPlayer.setVolume(100f,100f);
+//            AudioManager audioManager = (AudioManager) getSystemService(Service.AUDIO_SERVICE);
+//            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
+//            mMediaPlayer.start();
+//            mMediaPlayer.setVolume(audioManager.getStreamVolume(AudioManager.STREAM_SYSTEM), audioManager.getStreamVolume(AudioManager.STREAM_SYSTEM));
 
         }
 
     }
 
     private void videoForward() {
-        Log.d(TAG, "  videoForward mCurrentPosition = " +mCurrentPosition);
+        Log.d(TAG, "  videoForward mCurrentPosition = " + mCurrentPosition);
 
+//        mMediaPlayer.seekTo();
         mSeekBar.setProgress(mCurrentPosition + 1500);
     }
 
     private void videoRewind() {
-        Log.d(TAG, "  videoRewind mCurrentPosition = " +mCurrentPosition);
+        Log.d(TAG, "  videoRewind mCurrentPosition = " + mCurrentPosition);
 
         mSeekBar.setProgress(mCurrentPosition - 1500);
 
@@ -222,8 +239,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "  currentPosition = " + mCurrentPosition + "  mDuration = " + mDuration);
 
 
-        }
-        else if (mMediaPlayer.isPlaying() && mMediaPlayer != null) {
+        } else if (mMediaPlayer.isPlaying() && mMediaPlayer != null) {
             Log.d(TAG, "  pause");
             mButtonPlay.setBackgroundResource(R.drawable.play_arrow);
             mMediaPlayer.pause();
@@ -246,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        if(mMediaPlayer !=null){
+        if (mMediaPlayer != null) {
             mMediaPlayer.setDisplay(surfaceHolder);//视频在SurfaceView上面展示  绑定
         }
         new MedaplayProgess().start();
@@ -287,19 +303,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private class MedaplayProgess extends Thread{
+    private class MedaplayProgess extends Thread {
         @Override
         public void run() {
             super.run();
 
             Intent intent = new Intent();
             intent.setAction("song");
-            while (flage){
+            while (flage) {
                 int currentPosition = mMediaPlayer.getCurrentPosition();//获取当前进度
 
-                intent.putExtra("pross",currentPosition);
-                if(currentPosition == mMediaPlayer.getDuration()){
-                    flage= false;
+                intent.putExtra("pross", currentPosition);
+                if (currentPosition == mMediaPlayer.getDuration()) {
+                    flage = false;
                 }
                 sendBroadcast(intent);
             }
