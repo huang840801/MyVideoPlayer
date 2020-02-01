@@ -6,29 +6,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.guanhong.myvideoplayer.MainActivity">
+    tools:context="com.guanhong.myvideoplayer.MainActivity"
+    tools:ignore="HardcodedText">
 
     <FrameLayout
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="100dp"
         android:background="#666666"
         android:foregroundGravity="center"
-        app:layout_constraintBottom_toTopOf="@+id/ll"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <SurfaceView
-            android:id="@+id/surfaceview"
+            android:id="@+id/surfaceView"
             android:layout_width="match_parent"
             android:layout_height="200dp" />
 
     </FrameLayout>
 
     <LinearLayout
-        android:id="@+id/ll"
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="0dp"
@@ -47,78 +47,104 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textview_current_time"
+                android:id="@+id/currentTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
                 android:layout_marginLeft="5dp"
                 android:text="00:00" />
 
             <SeekBar
-                android:id="@+id/seek_bar"
-                android:layout_width="match_parent"
+                android:id="@+id/seekBar"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
             <TextView
-                android:id="@+id/textview_total_time"
+                android:id="@+id/totalTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
                 android:layout_marginRight="5dp"
                 android:text="00:00" />
         </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btn_play"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_centerHorizontal="true"
-                android:background="@drawable/play_arrow"
-                android:checked="true" />
-            <!--<Button-->
-            <!--android:id="@+id/btn_pause"-->
-            <!--android:layout_width="50dp"-->
-            <!--android:layout_height="50dp"-->
-            <!--android:layout_centerHorizontal="true"-->
-            <!--android:background="@drawable/pause"-->
-            <!--android:checked="true" />-->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btn_volume"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginLeft="20dp"
-                android:background="@drawable/volume_off" />
+                <Button
+                    android:id="@+id/volumeBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/volume_open" />
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/btn_rewind"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginLeft="90dp"
-                android:background="@drawable/fast_rewind" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btn_forward"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="90dp"
-                android:background="@drawable/fast_forward" />
+                <Button
+                    android:id="@+id/rewindBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/fast_rewind" />
+            </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btn_fullscreen"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="20dp"
-                android:background="@drawable/fullscreen" />
-        </RelativeLayout>
+                <Button
+                    android:id="@+id/playBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/play_arrow" />
+            </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
 
+                <Button
+                    android:id="@+id/forwardBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/fast_forward" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/fullscreenBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/fullscreen" />
+            </LinearLayout>
+
+        </LinearLayout>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
