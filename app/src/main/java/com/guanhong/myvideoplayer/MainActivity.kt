@@ -1,27 +1,23 @@
 package com.guanhong.myvideoplayer
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.os.Handler
 import android.view.SurfaceHolder
+import android.view.View
 import android.widget.SeekBar
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), SurfaceHolder.Callback {
+class MainActivity : AppCompatActivity() {
 
+    private lateinit var mediaPlayer: MediaPlayer
     private lateinit var surfaceHolder: SurfaceHolder
 
-    private var mediaPlayer: MediaPlayer? = null
-    private var myReceiver: MyRecever? = null
-    private var mCurrentPosition = 0
-    private var mDuration: Int = 0
+    private var handler = Handler()
+    private var currentTime = 0
     private var isMute = false
 
     companion object {
@@ -33,82 +29,48 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initView()
-
-        initBoardCastReceiver()
-
-        initListener()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(myReceiver)
-        if (mediaPlayer != null) {
-            mediaPlayer!!.release()
-            mediaPlayer = null
-        }
-
-    }
-
-    override fun surfaceCreated(surfaceHolder: SurfaceHolder) {
-        if (mediaPlayer != null) {
-            mediaPlayer!!.setDisplay(surfaceHolder)
-        }
-        MediaPlayProgress().start()
-    }
-
-    override fun surfaceChanged(surfaceHolder: SurfaceHolder, i: Int, i1: Int, i2: Int) {
-
-    }
-
-    override fun surfaceDestroyed(surfaceHolder: SurfaceHolder) {
-
-    }
-
-    private fun initBoardCastReceiver() {
-
-        myReceiver = MyRecever()
-        val filter = IntentFilter()
-        filter.addAction("song")
-        registerReceiver(myReceiver, filter)
-    }
-
-    private fun initView() {
-
-        surfaceHolder = surfaceView!!.holder
         mediaPlayer = MediaPlayer.create(this, Uri.parse(VIDEO_URL))
 
-        surfaceHolder.addCallback(this)
-        surfaceHolder.setKeepScreenOn(false)
-        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
+        initSurfaceView()
 
-        mDuration = mediaPlayer!!.duration
-        seekBar.max = mDuration
+        setTotalTime(mediaPlayer.duration)
+
+        seekBar.max = mediaPlayer.duration
         seekBar.progress = 0
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
-                if (b) {
-                    mediaPlayer!!.seekTo(i)
+
+            override fun onProgressChanged(seekBar: SeekBar, progressValue: Int, isFromUser: Boolean) {
+
+                currentTime = progressValue
+
+                if (isFromUser) {
+                    mediaPlayer.seekTo(progressValue)
                 }
+
+                if (progressValue == seekBar.max) {
+
+                    stopVideoPlaying()
+                    videoPause()
+                }
+
+                setCurrentTime(currentTime)
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-                mediaPlayer!!.pause()
-            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                mediaPlayer!!.start()
-
-            }
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
-    }
-
-    private fun initListener() {
 
         playBtn.setOnClickListener {
 
-            playOrPause()
+            if (mediaPlayer.isPlaying) {
+
+                videoPause()
+            } else {
+
+                videoPlay()
+            }
         }
         volumeBtn.setOnClickListener {
 
@@ -116,21 +78,97 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback {
         }
         rewindBtn.setOnClickListener {
 
-            rewindVideo()
+            currentTime -= 15000
+            mediaPlayer.seekTo(currentTime)
         }
         forwardBtn.setOnClickListener {
 
-            forwardVideo()
-        }
-
-        fullscreenBtn.setOnClickListener {
-            videoFullScreen()
-            //todo 橫屏
+            currentTime += 15000
+            mediaPlayer.seekTo(currentTime)
         }
     }
 
-    private fun videoFullScreen() {
+    override fun onDestroy() {
+        super.onDestroy()
 
+        mediaPlayer.release()
+    }
+
+    private fun initSurfaceView() {
+
+        surfaceHolder = surfaceView!!.holder
+
+        surfaceHolder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(surfaceHolder: SurfaceHolder) {
+                mediaPlayer.setDisplay(surfaceHolder)
+
+                hideProgressBar()
+            }
+
+            override fun surfaceChanged(surfaceHolder: SurfaceHolder, i: Int, i1: Int, i2: Int) {}
+
+            override fun surfaceDestroyed(surfaceHolder: SurfaceHolder) {}
+        })
+        surfaceHolder.setKeepScreenOn(false)
+        surfaceHolder.setType(AudioManager.STREAM_MUSIC)
+    }
+
+    private fun setTotalTime(millisecond: Int) {
+
+        val minutes = millisecond / 1000 / 60
+
+        val minutesString = if (minutes < 10) {
+
+            "0$minutes"
+        } else {
+            minutes.toString()
+        }
+        val second = millisecond / 1000 % 60
+
+        val secondString = if (second < 10) {
+
+            "0$second"
+        } else {
+            second.toString()
+        }
+        totalTime.text = "$minutesString : $secondString"
+    }
+
+    private fun setCurrentTime(millisecond: Int) {
+
+        val minutes = millisecond / 1000 / 60
+
+        val minutesString = if (minutes < 10) {
+
+            "0$minutes"
+        } else {
+            minutes.toString()
+        }
+        val second = millisecond / 1000 % 60
+
+        val secondString = if (second < 10) {
+
+            "0$second"
+        } else {
+            second.toString()
+        }
+
+        currentTimeTextView.text = "$minutesString : $secondString"
+    }
+
+    private fun videoPlay() {
+
+        startVideoPlaying()
+
+        playBtn!!.setBackgroundResource(R.drawable.pause)
+        mediaPlayer.start()
+    }
+
+    private fun videoPause() {
+
+        playBtn.setBackgroundResource(R.drawable.play_arrow)
+        mediaPlayer.pause()
+        stopVideoPlaying()
     }
 
     private fun setVolume() {
@@ -139,100 +177,43 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
         if (isMute) {
 
-            volumeBtn!!.setBackgroundResource(R.drawable.volume_off)
+            volumeBtn.setBackgroundResource(R.drawable.volume_off)
 
-            mediaPlayer!!.setVolume(0f, 0f)
+            mediaPlayer.setVolume(0f, 0f)
 
         } else {
 
             volumeBtn!!.setBackgroundResource(R.drawable.volume_open)
 
-            mediaPlayer!!.setAudioStreamType(AudioManager.STREAM_MUSIC)
-            mediaPlayer!!.start()
-            mediaPlayer!!.setVolume(1f, 1f)
+            mediaPlayer.setVolume(1f, 1f)
         }
     }
 
-    private fun forwardVideo() {
+    private fun startVideoPlaying() {
 
-        seekBar!!.progress = mCurrentPosition + 1500
+        currentTime = mediaPlayer.currentPosition
+
+        handler.postDelayed({
+
+            seekBar.progress = currentTime
+            startVideoPlaying()
+
+        }, 1000)
     }
 
-    private fun rewindVideo() {
+    private fun stopVideoPlaying() {
 
-        seekBar!!.progress = mCurrentPosition - 1500
+        handler.removeCallbacksAndMessages(null)
     }
 
-    private fun playOrPause() {
+    private fun showProgressBar() {
 
-        if (mediaPlayer != null) {
-
-            if (mediaPlayer!!.isPlaying) {
-
-                videoPause()
-            } else {
-
-                videoPlay()
-            }
-        }
+        progressBar.visibility = View.VISIBLE
     }
 
-    private fun videoPlay() {
+    private fun hideProgressBar() {
 
-        playBtn!!.setBackgroundResource(R.drawable.pause)
-        mediaPlayer!!.start()
+        progressBar.visibility = View.INVISIBLE
 
-        mCurrentPosition = mediaPlayer!!.currentPosition
-        mDuration = mediaPlayer!!.duration
-    }
-
-    private fun videoPause() {
-
-        playBtn!!.setBackgroundResource(R.drawable.play_arrow)
-        mediaPlayer!!.pause()
-    }
-
-    private fun setTime(currentPosition: Int, duration: Int) {
-
-        totalTime!!.text = ((duration / 1000 / 60 % 60 / 10).toString() + "" + duration / 1000 / 60 % 60 % 10 + ":"
-                + mDuration / 1000 % 60 / 10 + "" + mDuration / 1000 % 60 % 10)
-        currentTime!!.text = ((currentPosition / 1000 / 60 % 60 / 10).toString() + "" + currentPosition / 1000 / 60 % 60 % 10 + ":"
-                + currentPosition / 1000 % 60 / 10 + "" + currentPosition / 1000 % 60 % 10)
-    }
-
-    private inner class MyRecever : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent?) {
-            if (intent != null) {
-                val progress = intent.getIntExtra("progress", -1)
-                seekBar!!.progress = progress
-
-                setTime(progress, mDuration)
-
-            }
-        }
-    }
-
-    private inner class MediaPlayProgress : Thread() {
-        override fun run() {
-            super.run()
-
-            var isVideoEnd = false
-
-            val intent = Intent()
-            intent.action = "song"
-
-            while (!isVideoEnd) {
-
-                val currentPosition = mediaPlayer!!.currentPosition
-
-                intent.putExtra("progress", currentPosition)
-                if (currentPosition == mediaPlayer!!.duration) {
-
-                    Log.d("Huang", " over")
-                    isVideoEnd = true
-                }
-                sendBroadcast(intent)
-            }
-        }
     }
 }

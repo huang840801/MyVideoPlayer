@@ -47,12 +47,12 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/currentTime"
+                android:id="@+id/currentTimeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginLeft="5dp"
-                android:text="00:00" />
+                android:text="00 : 00" />
 
             <SeekBar
                 android:id="@+id/seekBar"
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="5dp"
                 android:layout_marginRight="5dp"
-                android:text="00:00" />
+                android:text="00 : 00" />
         </LinearLayout>
 
         <LinearLayout
@@ -146,5 +146,14 @@
 
         </LinearLayout>
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/frameLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/frameLayout" />
 
 </android.support.constraint.ConstraintLayout>
